@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Clock, Flame } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 export const CountdownTimer: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 45, seconds: 30 });
@@ -21,17 +21,15 @@ export const CountdownTimer: React.FC = () => {
   const format = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <div className="flex items-center gap-3 bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-indigo-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
-      <div className="flex items-center gap-1.5 text-amber-400 font-semibold text-xs tracking-wide uppercase">
-        <Flame className="w-4 h-4 text-amber-500 animate-bounce" />
-        Flash Sale Ends In:
-      </div>
-      <div className="flex items-center gap-1 font-mono font-bold text-slate-100 text-sm">
-        <span className="bg-slate-900/80 px-2 py-0.5 rounded border border-white/10">{format(timeLeft.hours)}</span>
-        <span>:</span>
-        <span className="bg-slate-900/80 px-2 py-0.5 rounded border border-white/10">{format(timeLeft.minutes)}</span>
-        <span>:</span>
-        <span className="bg-slate-900/80 px-2 py-0.5 rounded border border-white/10 text-amber-400">{format(timeLeft.seconds)}</span>
+    <div className="inline-flex items-center gap-2.5 bg-slate-900/90 border border-slate-800 px-3.5 py-1.5 rounded-full text-xs">
+      <Clock className="w-3.5 h-3.5 text-amber-400" />
+      <span className="text-slate-400 font-medium">Sisa Waktu Sales:</span>
+      <div className="flex items-center gap-1 font-mono font-bold text-white">
+        <span>{format(timeLeft.hours)}h</span>
+        <span className="text-slate-600">:</span>
+        <span>{format(timeLeft.minutes)}m</span>
+        <span className="text-slate-600">:</span>
+        <span className="text-amber-400">{format(timeLeft.seconds)}s</span>
       </div>
     </div>
   );

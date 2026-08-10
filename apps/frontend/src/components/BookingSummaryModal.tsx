@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Ticket, Order } from '@/types/booking';
-import { ShieldCheck, Lock, CheckCircle2, AlertCircle, Loader2, X, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, AlertCircle, Loader2, X, Ticket as TicketIcon } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface BookingSummaryModalProps {
@@ -38,13 +38,13 @@ export const BookingSummaryModal: React.FC<BookingSummaryModalProps> = ({ seat, 
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        throw new Error(json.error || json.message || 'Pemesanan gagal. Silakan coba beberapa saat lagi.');
+        throw new Error(json.error || json.message || 'Pemesanan gagal. Kursi sudah dipilih oleh pembeli lain.');
       }
 
       setSuccessOrder(json.data);
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 70,
+        spread: 60,
         origin: { y: 0.6 },
       });
     } catch (err: any) {
@@ -55,143 +55,126 @@ export const BookingSummaryModal: React.FC<BookingSummaryModalProps> = ({ seat, 
   };
 
   return (
-    <div className="fixed inset-[0] z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/10 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl overflow-hidden">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {!successOrder ? (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                <Lock className="w-6 h-6" />
+          <div className="space-y-5">
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-3.5">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <TicketIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Konfirmasi Pemesanan</h3>
-                <p className="text-xs text-slate-400">Review tiket pilihan Anda sebelum diproses oleh Redis Lock</p>
+                <h3 className="text-base font-bold text-white">Ringkasan Pemesanan</h3>
+                <p className="text-xs text-slate-400">Pastikan rincian tiket Anda sudah benar</p>
               </div>
             </div>
 
             {/* Ticket Info Card */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-400">Event</span>
-                <span className="text-white font-semibold">Coldplay Jakarta Flash Sale</span>
+            <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400">Nama Acara</span>
+                <span className="text-white font-medium">Coldplay Jakarta Flash Sale</span>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Nomor Kursi</span>
-                <span className="font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded border border-indigo-500/20">
+                <span className="font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
                   {seat.seat_number}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Kategori</span>
-                <span className="text-slate-200 font-medium">{seat.category}</span>
+                <span className="text-slate-300 font-medium">{seat.category}</span>
               </div>
               <div className="w-full h-[1px] bg-slate-800 my-2" />
-              <div className="flex justify-between items-center text-base">
-                <span className="text-slate-300 font-medium">Total Harga</span>
-                <span className="text-lg font-bold text-emerald-400">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-300 font-medium">Total Tagihan</span>
+                <span className="text-base font-bold text-emerald-400">
                   Rp {seat.price.toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
 
-            {/* Proteksi System Badges */}
-            <div className="grid grid-cols-2 gap-3 text-[11px] text-slate-400">
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Redis Distributed Lock Active</span>
-              </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Idempotency Guarantee</span>
-              </div>
+            {/* Security Note */}
+            <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-950/40 p-2.5 rounded-lg border border-slate-800/50">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Tiket dijamin 100% resmi & pemesanan instan.</span>
             </div>
 
-            {/* Error Banner */}
+            {/* Error Message */}
             {errorMessage && (
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
-                <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+              <div className="flex items-center gap-2.5 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-1">
               <button
                 onClick={onClose}
                 disabled={loading}
-                className="w-1/3 py-3 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold transition-colors"
+                className="w-1/3 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-medium transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={handleConfirmBooking}
                 disabled={loading}
-                className="w-2/3 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all"
+                className="w-2/3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    Memproses di Redis & RabbitMQ...
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Memproses Tiket...
                   </>
                 ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 text-indigo-200" />
-                    Proses Beli Tiket
-                  </>
+                  'Bayar & Ambil Tiket'
                 )}
               </button>
             </div>
           </div>
         ) : (
-          /* Success Confirmation Screen */
-          <div className="text-center py-4 space-y-6">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mx-auto shadow-xl shadow-emerald-500/20 animate-in zoom-in duration-300">
-              <CheckCircle2 className="w-10 h-10" />
+          /* Success Screen */
+          <div className="text-center py-3 space-y-5">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto shadow-md shadow-emerald-500/10">
+              <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div>
-              <h3 className="text-2xl font-bold text-white">Pemesanan Tiket Sukses!</h3>
+              <h3 className="text-xl font-bold text-white">Pembelian Tiket Berhasil!</h3>
               <p className="text-xs text-slate-400 mt-1">
-                Event pesanan Anda sedang dikonsumsi oleh RabbitMQ Background Worker.
+                E-Ticket resmi Anda telah diterbitkan.
               </p>
             </div>
 
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-2 text-left text-xs text-slate-300">
+            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-2 text-left text-xs text-slate-300">
               <div className="flex justify-between">
-                <span className="text-slate-400">Order ID:</span>
-                <span className="font-mono text-indigo-400 font-bold">{successOrder.id}</span>
+                <span className="text-slate-400">Kode Transaksi:</span>
+                <span className="font-mono text-indigo-400 font-bold">{successOrder.id.substring(0, 8).toUpperCase()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Kursi Dipesan:</span>
+                <span className="text-slate-400">Nomor Kursi:</span>
                 <span className="font-bold text-white">{seat.seat_number}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Status Order:</span>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">
-                  {successOrder.status}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Idempotency Key:</span>
-                <span className="font-mono text-slate-400 text-[10px] truncate max-w-[200px]">
-                  {successOrder.idempotency_key}
-                </span>
+                <span className="text-slate-400">Status Transaksi:</span>
+                <span className="text-emerald-400 font-semibold">Terkonfirmasi</span>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-bold transition-colors"
+              className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors"
             >
-              Selesai & Kembali ke Denah
+              Tutup
             </button>
           </div>
         )}

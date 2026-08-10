@@ -1,47 +1,49 @@
 'use client';
 
 import React from 'react';
-import { Ticket, Zap, ShieldCheck, User } from 'lucide-react';
+import { Ticket, Search, User, ShieldCheck } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/60 px-6 py-3.5">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
         {/* Brand Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-            <Ticket className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20">
+            <Ticket className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              TICKET<span className="text-indigo-400">PULSE</span>
-              <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                PRO ENGINE
-              </span>
-            </h1>
-            <p className="text-xs text-slate-400 hidden sm:block">High-Concurrency Concert Booking</p>
+            <span className="text-xl font-bold tracking-tight text-white">
+              TIX<span className="text-indigo-400">PAS</span>
+            </span>
           </div>
         </div>
 
-        {/* System Health Badges */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            Redis Lock Ready
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium">
-            <Zap className="w-3.5 h-3.5" />
-            RabbitMQ Active
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
-            Idempotency Shield
-          </div>
-        </div>
+        {/* Navigation Links */}
+        <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-slate-300">
+          <a href="#" className="text-white font-semibold hover:text-indigo-400 transition-colors">Konser Musik</a>
+          <a href="#" className="hover:text-indigo-400 transition-colors">Festival</a>
+          <a href="#" className="hover:text-indigo-400 transition-colors">Olahraga</a>
+          <a href="#" className="hover:text-indigo-400 transition-colors">Bantuan</a>
+        </nav>
 
-        {/* User Badge */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
+        {/* Search & User Badge */}
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs w-48 lg:w-64">
+            <Search className="w-3.5 h-3.5" />
+            <input
+              type="text"
+              placeholder="Cari konser atau artis..."
+              className="bg-transparent border-none outline-none text-white text-xs w-full placeholder:text-slate-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-slate-300 font-medium bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span className="hidden sm:inline">Partner Resmi</span>
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
             <User className="w-4 h-4" />
           </div>
         </div>
