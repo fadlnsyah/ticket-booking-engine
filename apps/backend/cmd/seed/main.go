@@ -45,6 +45,9 @@ func main() {
 
 	log.Println("[SEED] Seeding database initial data...")
 
+	// Reset old tickets & orders to ensure clean UUID mapping
+	_, _ = db.Exec(`TRUNCATE TABLE orders, tickets CASCADE;`)
+
 	eventID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
 	totalTickets := 1000
 
@@ -68,7 +71,7 @@ func main() {
 	stmt, err := tx.Prepare(`
 		INSERT INTO tickets (id, event_id, seat_number, price, status, version)
 		VALUES ($1, $2, $3, $4, 'AVAILABLE', 1)
-		ON CONFLICT (event_id, seat_number) DO NOTHING
+		ON CONFLICT (event_id, seat_number) DO UPDATE SET id = EXCLUDED.id, status = 'AVAILABLE', version = 1
 	`)
 	if err != nil {
 		log.Fatalf("Failed to prepare stmt: %v", err)
