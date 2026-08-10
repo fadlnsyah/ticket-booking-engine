@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS events;
+DROP TYPE IF EXISTS order_status;
+DROP TYPE IF EXISTS ticket_status;

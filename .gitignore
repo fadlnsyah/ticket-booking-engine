@@ -1,0 +1,42 @@
+# Environment Variables
+.env
+.env.local
+*.env
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Executables & Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+tmp/
+bin/
+
+# Go build & cache
+apps/backend/bin/
+apps/backend/tmp/
+apps/backend/coverage.out
+
+# Node.js / Next.js (Frontend)
+apps/frontend/node_modules/
+apps/frontend/.next/
+apps/frontend/out/
+apps/frontend/build/
+apps/frontend/.vercel
+
+# IDE / Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker Volumes local mount
+postgres_data/
+redis_data/
+rabbitmq_data/
