@@ -15,6 +15,9 @@ backend-worker:
 seed:
 	cd apps/backend && go run cmd/seed/main.go
 
+frontend-run:
+	cd apps/frontend && npm run dev
+
 test:
 	cd apps/backend && go test -v -race ./...
 
