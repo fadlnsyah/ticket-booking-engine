@@ -75,15 +75,10 @@ func main() {
 	}
 	defer stmt.Close()
 
-	firstTicketID := uuid.MustParse("11111111-1111-1111-1111-111111111111")
-	_, err = stmt.Exec(firstTicketID, eventID, "SEAT-A-0001", 1500000.00)
-	if err != nil {
-		log.Fatalf("Failed to insert first ticket: %v", err)
-	}
-
-	for i := 2; i <= totalTickets; i++ {
+	for i := 1; i <= totalTickets; i++ {
 		seatNo := fmt.Sprintf("SEAT-A-%04d", i)
-		ticketID := uuid.New()
+		ticketIDStr := fmt.Sprintf("11111111-1111-1111-1111-%012d", i)
+		ticketID := uuid.MustParse(ticketIDStr)
 		_, err := stmt.Exec(ticketID, eventID, seatNo, 1500000.00)
 		if err != nil {
 			log.Fatalf("Failed to insert ticket %d: %v", i, err)
@@ -96,5 +91,5 @@ func main() {
 
 	log.Printf("[SEED] Successfully seeded 1,000 tickets into database!")
 	log.Printf("[SEED] Test Event ID:  %s", eventID)
-	log.Printf("[SEED] Test Ticket ID: %s", firstTicketID)
+	log.Printf("[SEED] Test Ticket ID: 11111111-1111-1111-1111-000000000001")
 }

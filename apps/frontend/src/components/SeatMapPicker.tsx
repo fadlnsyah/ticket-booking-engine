@@ -14,21 +14,22 @@ const generateMockSeats = (): Ticket[] => {
   const categories: ('VIP' | 'CAT 1' | 'CAT 2')[] = ['VIP', 'CAT 1', 'CAT 2'];
   const seats: Ticket[] = [];
   const eventId = '22222222-2222-2222-2222-222222222222';
-  const firstTicketId = '11111111-1111-1111-1111-111111111111';
 
   let seatIndex = 1;
-  categories.forEach((cat, catIdx) => {
+  categories.forEach((cat) => {
     const price = cat === 'VIP' ? 2500000 : cat === 'CAT 1' ? 1800000 : 1200000;
     const count = 16;
     for (let i = 1; i <= count; i++) {
-      const isFirst = seatIndex === 1;
       const isHeld = seatIndex === 5 || seatIndex === 14;
       const isBooked = seatIndex === 8 || seatIndex === 12 || seatIndex === 22 || seatIndex === 30;
       
+      const uuidSuffix = seatIndex.toString().padStart(12, '0');
+      const validTicketUuid = `11111111-1111-1111-1111-${uuidSuffix}`;
+      
       seats.push({
-        id: isFirst ? firstTicketId : `ticket-${seatIndex}`,
+        id: validTicketUuid,
         event_id: eventId,
-        seat_number: `SEAT-${cat.charAt(0)}-${i.toString().padStart(4, '0')}`,
+        seat_number: `SEAT-A-${seatIndex.toString().padStart(4, '0')}`,
         price: price,
         status: isBooked ? 'BOOKED' : isHeld ? 'HELD' : 'AVAILABLE',
         category: cat,
