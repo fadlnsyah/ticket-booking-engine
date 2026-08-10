@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
@@ -25,9 +26,25 @@ func main() {
 		log.Fatalf("PostgreSQL connection error: %v", err)
 	}
 
+	// Run initial migration automatically if tables do not exist
+	migrationPaths := []string{"migrations/000001_init_schema.up.sql", "../migrations/000001_init_schema.up.sql", "../../migrations/000001_init_schema.up.sql"}
+	var migrationSQL []byte
+	for _, p := range migrationPaths {
+		if content, err := os.ReadFile(p); err == nil {
+			migrationSQL = content
+			break
+		}
+	}
+
+	if len(migrationSQL) > 0 {
+		log.Println("[SEED] Running initial database migrations...")
+		if _, err := db.Exec(string(migrationSQL)); err != nil {
+			log.Printf("[WARN] Migration execution note: %v", err)
+		}
+	}
+
 	log.Println("[SEED] Seeding database initial data...")
 
-	// 1. Create a Flash-Sale Event
 	eventID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
 	totalTickets := 1000
 
@@ -42,7 +59,6 @@ func main() {
 	}
 	log.Printf("[SEED] Inserted Event ID: %s (Total Tickets: %d)", eventID, totalTickets)
 
-	// 2. Insert 1,000 Tickets in Batch Transaction
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatalf("Failed to begin tx: %v", err)
