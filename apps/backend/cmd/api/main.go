@@ -13,10 +13,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 	"github.com/yourname/ticket-booking-engine/apps/backend/internal/config"
 	delivery "github.com/yourname/ticket-booking-engine/apps/backend/internal/delivery/http"
 	"github.com/yourname/ticket-booking-engine/apps/backend/internal/repository/postgres"
+	rmqRepo "github.com/yourname/ticket-booking-engine/apps/backend/internal/repository/rabbitmq"
 	redisRepo "github.com/yourname/ticket-booking-engine/apps/backend/internal/repository/redis"
 	"github.com/yourname/ticket-booking-engine/apps/backend/internal/usecase"
 	"github.com/yourname/ticket-booking-engine/apps/backend/pkg/response"
@@ -55,9 +57,19 @@ func main() {
 		log.Println("[REDIS] Connected to Redis successfully")
 	}
 
+	var queueRepo rmqRepo.QueueRepository
+	rmqConn, err := amqp.Dial(cfg.RabbitMQURL)
+	if err != nil {
+		log.Printf("[WARN] RabbitMQ not reachable at startup: %v", err)
+	} else {
+		defer rmqConn.Close()
+		log.Println("[RABBITMQ] Connected to RabbitMQ successfully")
+		queueRepo = rmqRepo.NewRabbitMQRepository(rmqConn)
+	}
+
 	bRepo := postgres.NewPostgresBookingRepository(db)
 	lRepo := redisRepo.NewRedisLockRepository(redisClient)
-	bUsecase := usecase.NewBookingUsecase(bRepo, lRepo)
+	bUsecase := usecase.NewBookingUsecase(bRepo, lRepo, queueRepo)
 	bHandler := delivery.NewBookingHandler(bUsecase)
 
 	if cfg.ServerEnv == "production" {

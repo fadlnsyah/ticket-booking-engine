@@ -1,0 +1,84 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	"github.com/google/uuid"
+	_ "github.com/lib/pq"
+	"github.com/yourname/ticket-booking-engine/apps/backend/internal/config"
+)
+
+func main() {
+	cfg := config.LoadConfig()
+
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBSSLMode)
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatalf("Failed to connect PostgreSQL: %v", err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("PostgreSQL connection error: %v", err)
+	}
+
+	log.Println("[SEED] Seeding database initial data...")
+
+	// 1. Create a Flash-Sale Event
+	eventID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
+	totalTickets := 1000
+
+	_, err = db.Exec(`
+		INSERT INTO events (id, title, description, total_tickets, available_tickets, start_time, end_time)
+		VALUES ($1, $2, $3, $4, $5, NOW(), NOW() + INTERVAL '7 days')
+		ON CONFLICT (id) DO UPDATE SET available_tickets = $5
+	`, eventID, "Coldplay World Tour 2026 - Jakarta Flash Sale", "Grand Flash Sale Event", totalTickets, totalTickets)
+
+	if err != nil {
+		log.Fatalf("Failed to seed event: %v", err)
+	}
+	log.Printf("[SEED] Inserted Event ID: %s (Total Tickets: %d)", eventID, totalTickets)
+
+	// 2. Insert 1,000 Tickets in Batch Transaction
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatalf("Failed to begin tx: %v", err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`
+		INSERT INTO tickets (id, event_id, seat_number, price, status, version)
+		VALUES ($1, $2, $3, $4, 'AVAILABLE', 1)
+		ON CONFLICT (event_id, seat_number) DO NOTHING
+	`)
+	if err != nil {
+		log.Fatalf("Failed to prepare stmt: %v", err)
+	}
+	defer stmt.Close()
+
+	firstTicketID := uuid.MustParse("11111111-1111-1111-1111-111111111111")
+	_, err = stmt.Exec(firstTicketID, eventID, "SEAT-A-0001", 1500000.00)
+	if err != nil {
+		log.Fatalf("Failed to insert first ticket: %v", err)
+	}
+
+	for i := 2; i <= totalTickets; i++ {
+		seatNo := fmt.Sprintf("SEAT-A-%04d", i)
+		ticketID := uuid.New()
+		_, err := stmt.Exec(ticketID, eventID, seatNo, 1500000.00)
+		if err != nil {
+			log.Fatalf("Failed to insert ticket %d: %v", i, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Fatalf("Failed to commit seed tx: %v", err)
+	}
+
+	log.Printf("[SEED] Successfully seeded 1,000 tickets into database!")
+	log.Printf("[SEED] Test Event ID:  %s", eventID)
+	log.Printf("[SEED] Test Ticket ID: %s", firstTicketID)
+}

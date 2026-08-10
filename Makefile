@@ -12,6 +12,9 @@ backend-run:
 backend-worker:
 	cd apps/backend && go run cmd/worker/main.go
 
+seed:
+	cd apps/backend && go run cmd/seed/main.go
+
 test:
 	cd apps/backend && go test -v -race ./...
 

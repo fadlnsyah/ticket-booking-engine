@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/yourname/ticket-booking-engine/apps/backend/internal/domain"
 	"github.com/yourname/ticket-booking-engine/apps/backend/internal/repository/postgres"
+	"github.com/yourname/ticket-booking-engine/apps/backend/internal/repository/rabbitmq"
 	"github.com/yourname/ticket-booking-engine/apps/backend/internal/repository/redis"
 )
 
@@ -18,12 +19,14 @@ type BookingUsecase interface {
 type bookingUsecase struct {
 	bookingRepo postgres.BookingRepository
 	lockRepo    redis.LockRepository
+	queueRepo   rabbitmq.QueueRepository
 }
 
-func NewBookingUsecase(bRepo postgres.BookingRepository, lRepo redis.LockRepository) BookingUsecase {
+func NewBookingUsecase(bRepo postgres.BookingRepository, lRepo redis.LockRepository, qRepo rabbitmq.QueueRepository) BookingUsecase {
 	return &bookingUsecase{
 		bookingRepo: bRepo,
 		lockRepo:    lRepo,
+		queueRepo:   qRepo,
 	}
 }
 
@@ -65,6 +68,12 @@ func (u *bookingUsecase) BookTicket(ctx context.Context, req domain.BookTicketRe
 	err = u.bookingRepo.CreateOrderTx(ctx, order)
 	if err != nil {
 		return nil, fmt.Errorf("booking failed: %w", err)
+	}
+
+	if u.queueRepo != nil {
+		go func(ord *domain.Order) {
+			_ = u.queueRepo.PublishOrderEvent(context.Background(), ord)
+		}(order)
 	}
 
 	return order, nil

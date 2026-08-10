@@ -52,7 +52,7 @@ func TestBookingUsecase_LockAcquisitionFailure(t *testing.T) {
 	bRepo := &mockBookingRepo{}
 	lRepo := &mockLockRepo{shouldFail: true}
 
-	uc := usecase.NewBookingUsecase(bRepo, lRepo)
+	uc := usecase.NewBookingUsecase(bRepo, lRepo, nil)
 
 	req := domain.BookTicketRequest{
 		UserID:         uuid.New(),
@@ -78,7 +78,7 @@ func TestBookingUsecase_Success(t *testing.T) {
 	}
 	lRepo := &mockLockRepo{shouldFail: false}
 
-	uc := usecase.NewBookingUsecase(bRepo, lRepo)
+	uc := usecase.NewBookingUsecase(bRepo, lRepo, nil)
 
 	req := domain.BookTicketRequest{
 		UserID:         uuid.New(),
